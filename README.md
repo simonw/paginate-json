@@ -27,3 +27,7 @@ Works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-u
         "https://api.github.com/repos/simonw/datasette/issues?state=all&filter=all" \
         --nl | \
         sqlite-utils upsert /tmp/issues.db issues - --nl --pk=id
+
+You can then use [other features of sqlite-utils](https://sqlite-utils.readthedocs.io/en/latest/cli.html) to enhance the resulting database. For example, to enable full-text search on the issue title and body columns:
+
+    sqlite-utils enable-fts /tmp/issues.db issues title body
