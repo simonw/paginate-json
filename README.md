@@ -21,7 +21,7 @@ Currently works against APIs that use the HTTP Link header for pagination. The G
 
 The `--jq` option only works if you install the optional pyjq dependency.
 
-Works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-utils). For example, here's how to load all of the GitHub issues for a projects into a local SQLite database.
+Works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-utils). For example, here's how to load all of the GitHub issues for a project into a local SQLite database.
 
     paginate-json \
         "https://api.github.com/repos/simonw/datasette/issues?state=all&filter=all" \
