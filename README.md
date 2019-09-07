@@ -14,10 +14,11 @@ Currently works against APIs that use the HTTP Link header for pagination. The G
       Fetch paginated JSON from a URL
 
     Options:
-      --version  Show the version and exit.
-      --nl       Output newline-delimited JSON
-      --jq TEXT  jq transformation to run on each page
-      --help     Show this message and exit.
+      --version      Show the version and exit.
+      --nl           Output newline-delimited JSON
+      --jq TEXT      jq transformation to run on each page
+      --accept TEXT  Accept header to send
+      --help         Show this message and exit.
 
 The `--jq` option only works if you install the optional pyjq dependency.
 
