@@ -13,7 +13,8 @@ except ImportError:
 @click.argument("url", type=str, required=True)
 @click.option("--nl", help="Output newline-delimited JSON", is_flag=True)
 @click.option("--jq", help="jq transformation to run on each page")
-def cli(url, nl, jq):
+@click.option("--accept", help="Accept header to send")
+def cli(url, nl, jq, accept):
     """
     Fetch paginated JSON from a URL
     """
@@ -23,7 +24,7 @@ def cli(url, nl, jq):
         )
 
     if nl:
-        for chunk in paginate(url, jq):
+        for chunk in paginate(url, jq, accept):
             click.echo(len(chunk), err=True)
             for row in chunk:
                 click.echo(json.dumps(row))
@@ -34,10 +35,13 @@ def cli(url, nl, jq):
         click.echo(json.dumps(all, indent=2))
 
 
-def paginate(url, jq):
+def paginate(url, jq, accept=None):
     while url:
         click.echo(url, err=True)
-        response = requests.get(url)
+        headers = {}
+        if accept is not None:
+            headers["Accept"] = accept
+        response = requests.get(url, headers=headers)
         try:
             url = response.links.get("next").get("url")
         except AttributeError:
