@@ -35,7 +35,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -e .
+            pip install -e .[test]
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}
           paths:
@@ -44,8 +44,6 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pip install -e .
-            pip install pytest
             pytest
   test-python-install:
     parameters:
@@ -63,7 +61,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -e .
+            pip install -e .[test]
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}
           paths:
@@ -72,8 +70,6 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pip install -e .
-            pip install pytest
             pytest
   deploy:
     docker:
@@ -87,7 +83,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -e .
+            pip install -e .[test]
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}
           paths:
