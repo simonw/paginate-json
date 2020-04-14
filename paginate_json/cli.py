@@ -17,7 +17,8 @@ except ImportError:
 @click.option("--jq", help="jq transformation to run on each page")
 @click.option("--accept", help="Accept header to send")
 @click.option("--sleep", help="Seconds to delay between requests", type=int)
-def cli(url, nl, jq, accept, sleep):
+@click.option("--silent", help="Don't show progress on stderr", is_flag=True)
+def cli(url, nl, jq, accept, sleep, silent):
     """
     Fetch paginated JSON from a URL
     """
@@ -27,20 +28,22 @@ def cli(url, nl, jq, accept, sleep):
         )
 
     if nl:
-        for chunk in paginate(url, jq, accept, sleep):
-            click.echo(len(chunk), err=True)
+        for chunk in paginate(url, jq, accept, sleep, silent):
+            if not silent:
+                click.echo(len(chunk), err=True)
             for row in chunk:
                 click.echo(json.dumps(row))
     else:
         all = []
-        for chunk in paginate(url, jq, accept, sleep):
+        for chunk in paginate(url, jq, accept, sleep, silent):
             all.extend(chunk)
         click.echo(json.dumps(all, indent=2))
 
 
-def paginate(url, jq, accept=None, sleep=None):
+def paginate(url, jq, accept=None, sleep=None, silent=False):
     while url:
-        click.echo(url, err=True)
+        if not silent:
+            click.echo(url, err=True)
         headers = {}
         if accept is not None:
             headers["Accept"] = accept

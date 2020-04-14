@@ -8,18 +8,18 @@ CLI tool for retrieving JSON from paginated APIs.
 
 Currently works against APIs that use the HTTP Link header for pagination. The GitHub API is [the most obvious example](https://developer.github.com/v3/guides/traversing-with-pagination/).
 
-    $ paginate-json --help
     Usage: paginate-json [OPTIONS] URL
 
       Fetch paginated JSON from a URL
 
     Options:
-      --version      Show the version and exit.
-      --nl           Output newline-delimited JSON
-      --jq TEXT      jq transformation to run on each page
-      --accept TEXT  Accept header to send
-      --sleep INT    Seconds to delay between requests
-      --help         Show this message and exit.
+      --version        Show the version and exit.
+      --nl             Output newline-delimited JSON
+      --jq TEXT        jq transformation to run on each page
+      --accept TEXT    Accept header to send
+      --sleep INTEGER  Seconds to delay between requests
+      --silent         Don't show progress on stderr
+      --help           Show this message and exit.
 
 The `--jq` option only works if you install the optional pyjq dependency.
 
