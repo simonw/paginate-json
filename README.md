@@ -18,6 +18,7 @@ Currently works against APIs that use the HTTP Link header for pagination. The G
       --nl           Output newline-delimited JSON
       --jq TEXT      jq transformation to run on each page
       --accept TEXT  Accept header to send
+      --sleep INT    Seconds to delay between requests
       --help         Show this message and exit.
 
 The `--jq` option only works if you install the optional pyjq dependency.

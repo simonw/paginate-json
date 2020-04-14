@@ -1,6 +1,8 @@
 import click
 import requests
 import json
+import time
+
 
 try:
     import pyjq
@@ -14,7 +16,8 @@ except ImportError:
 @click.option("--nl", help="Output newline-delimited JSON", is_flag=True)
 @click.option("--jq", help="jq transformation to run on each page")
 @click.option("--accept", help="Accept header to send")
-def cli(url, nl, jq, accept):
+@click.option("--sleep", help="Seconds to delay between requests", type=int)
+def cli(url, nl, jq, accept, sleep):
     """
     Fetch paginated JSON from a URL
     """
@@ -24,18 +27,18 @@ def cli(url, nl, jq, accept):
         )
 
     if nl:
-        for chunk in paginate(url, jq, accept):
+        for chunk in paginate(url, jq, accept, sleep):
             click.echo(len(chunk), err=True)
             for row in chunk:
                 click.echo(json.dumps(row))
     else:
         all = []
-        for chunk in paginate(url, jq):
+        for chunk in paginate(url, jq, accept, sleep):
             all.extend(chunk)
         click.echo(json.dumps(all, indent=2))
 
 
-def paginate(url, jq, accept=None):
+def paginate(url, jq, accept=None, sleep=None):
     while url:
         click.echo(url, err=True)
         headers = {}
@@ -50,3 +53,5 @@ def paginate(url, jq, accept=None):
             yield pyjq.first(jq, response.json())
         else:
             yield response.json()
+        if sleep is not None:
+            time.sleep(sleep)
