@@ -22,3 +22,17 @@ def test_paginate_json(requests_mock):
     assert 0 == result.exit_code
     assert "[\n  1,\n  2,\n  3,\n  4\n]\n" == result.stdout
     assert "https://example.com/\nhttps://example.com/?page=2\n" == result.stderr
+
+
+def test_header(requests_mock):
+    requests_mock.get("https://example.com/", json=[1, 2])
+    result = CliRunner(mix_stderr=False).invoke(
+        cli.cli,
+        ["https://example.com/", "--header", "foo", "bar", "--header", "baz", "1"],
+    )
+    assert 0 == result.exit_code
+    assert "[\n  1,\n  2\n]\n" == result.stdout
+    assert "https://example.com/\n" == result.stderr
+    sent_request = requests_mock.request_history[0]
+    assert "bar" == dict(sent_request.headers)["foo"]
+    assert "1" == dict(sent_request.headers)["baz"]

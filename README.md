@@ -13,13 +13,15 @@ Currently works against APIs that use the HTTP Link header for pagination. The G
       Fetch paginated JSON from a URL
 
     Options:
-      --version        Show the version and exit.
-      --nl             Output newline-delimited JSON
-      --jq TEXT        jq transformation to run on each page
-      --accept TEXT    Accept header to send
-      --sleep INTEGER  Seconds to delay between requests
-      --silent         Don't show progress on stderr
-      --help           Show this message and exit.
+      --version                Show the version and exit.
+      --nl                     Output newline-delimited JSON
+      --jq TEXT                jq transformation to run on each page
+      --accept TEXT            Accept header to send
+      --sleep INTEGER          Seconds to delay between requests
+      --silent                 Don't show progress on stderr
+      --show-headers           Dump response headers out to stderr
+      --header <TEXT TEXT>...  Send custom request headers
+      --help                   Show this message and exit.
 
 The `--jq` option only works if you install the optional pyjq dependency.
 
@@ -33,3 +35,8 @@ Works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-u
 You can then use [other features of sqlite-utils](https://sqlite-utils.readthedocs.io/en/latest/cli.html) to enhance the resulting database. For example, to enable full-text search on the issue title and body columns:
 
     sqlite-utils enable-fts /tmp/issues.db issues title body
+
+You can use the `--header` option to send additional request headers. For example, if you have a GitHub OAuth token you can pass it like this:
+
+    paginate-json https://api.github.com/users/simonw/events \
+      --header Authorization "bearer e94d9e404d86..."
