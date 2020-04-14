@@ -23,7 +23,7 @@ setup(
     license="Apache License, Version 2.0",
     packages=find_packages(),
     install_requires=["requests", "click"],
-    extras_require={"test": ["pytest"], "pyjq": ["pyjq"]},
+    extras_require={"test": ["pytest", "requests-mock"], "pyjq": ["pyjq"]},
     tests_require=["paginate-json[test]"],
     entry_points="""
         [console_scripts]
