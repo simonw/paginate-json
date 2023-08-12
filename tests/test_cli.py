@@ -1,5 +1,6 @@
 from paginate_json import cli
 from click.testing import CliRunner
+import pytest
 
 
 def test_pyjq_error():
@@ -11,11 +12,16 @@ def test_pyjq_error():
     )
 
 
-def test_paginate_json(requests_mock):
+@pytest.mark.parametrize("relative_urls", (False, True))
+def test_paginate_json(requests_mock, relative_urls):
     requests_mock.get(
         "https://example.com/",
         json=[1, 2],
-        headers={"link": '<https://example.com/?page=2>; rel="next"'},
+        headers={
+            "link": '<{}>; rel="next"'.format(
+                "/?page=2" if relative_urls else "https://example.com/?page=2"
+            )
+        },
     )
     requests_mock.get("https://example.com/?page=2", json=[3, 4])
     result = CliRunner(mix_stderr=False).invoke(cli.cli, ["https://example.com/"])

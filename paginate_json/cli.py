@@ -63,7 +63,9 @@ def paginate(
                 json.dumps(dict(response.headers), indent=4, default=repr), err=True
             )
         try:
-            url = response.links.get("next").get("url")
+            next = response.links.get("next").get("url")
+            # Resolve a potentially-relative URL to an absolute URL
+            url = requests.compat.urljoin(url, next)
         except AttributeError:
             url = None
         if jq:
