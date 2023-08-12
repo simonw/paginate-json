@@ -1,6 +1,8 @@
 # paginate-json
 
 [![PyPI](https://img.shields.io/pypi/v/paginate-json.svg)](https://pypi.python.org/pypi/paginate-json)
+[![Changelog](https://img.shields.io/github/v/release/simonw/paginate-json?include_prereleases&label=changelog)](https://paginate-json.datasette.io/en/stable/changelog.html)
+[![Tests](https://github.com/simonw/paginate-json/workflows/Test/badge.svg)](https://github.com/simonw/paginate-json/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/paginate-json/blob/master/LICENSE)
 
 CLI tool for retrieving JSON from paginated APIs.
