@@ -28,9 +28,9 @@ The `--jq` option only works if you install the optional pyjq dependency.
 Works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-utils). For example, here's how to load all of the GitHub issues for a project into a local SQLite database.
 
     paginate-json \
-        "https://api.github.com/repos/simonw/datasette/issues?state=all&filter=all" \
-        --nl | \
-        sqlite-utils upsert /tmp/issues.db issues - --nl --pk=id
+      "https://api.github.com/repos/simonw/datasette/issues?state=all&filter=all" \
+      --nl | \
+      sqlite-utils upsert /tmp/issues.db issues - --nl --pk=id
 
 You can then use [other features of sqlite-utils](https://sqlite-utils.readthedocs.io/en/latest/cli.html) to enhance the resulting database. For example, to enable full-text search on the issue title and body columns:
 
