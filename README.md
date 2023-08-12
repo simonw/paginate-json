@@ -6,6 +6,11 @@
 
 CLI tool for retrieving JSON from paginated APIs.
 
+Examples:
+
+- [Combined release notes from GitHub with jq and paginate-json](https://til.simonwillison.net/jq/combined-github-release-notes)
+- [Export a Mastodon timeline to SQLite](https://til.simonwillison.net/mastodon/export-timeline-to-sqlite)
+
 Currently works against APIs that use the HTTP Link header for pagination. The GitHub API is [the most obvious example](https://developer.github.com/v3/guides/traversing-with-pagination/).
 
     Usage: paginate-json [OPTIONS] URL
