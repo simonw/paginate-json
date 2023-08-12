@@ -32,17 +32,18 @@ Currently works against APIs that use the HTTP Link header for pagination. The G
 The `--jq` option only works if you install the optional pyjq dependency.
 
 Works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-utils). For example, here's how to load all of the GitHub issues for a project into a local SQLite database.
-
-    paginate-json \
-      "https://api.github.com/repos/simonw/datasette/issues?state=all&filter=all" \
-      --nl | \
-      sqlite-utils upsert /tmp/issues.db issues - --nl --pk=id
-
+```bash
+paginate-json \
+  "https://api.github.com/repos/simonw/datasette/issues?state=all&filter=all" \
+  --nl | \
+  sqlite-utils upsert /tmp/issues.db issues - --nl --pk=id
+```
 You can then use [other features of sqlite-utils](https://sqlite-utils.readthedocs.io/en/latest/cli.html) to enhance the resulting database. For example, to enable full-text search on the issue title and body columns:
-
-    sqlite-utils enable-fts /tmp/issues.db issues title body
-
+```bash
+sqlite-utils enable-fts /tmp/issues.db issues title body
+```
 You can use the `--header` option to send additional request headers. For example, if you have a GitHub OAuth token you can pass it like this:
-
-    paginate-json https://api.github.com/users/simonw/events \
-      --header Authorization "bearer e94d9e404d86..."
+```bash
+paginate-json https://api.github.com/users/simonw/events \
+  --header Authorization "bearer e94d9e404d86..."
+```
