@@ -101,6 +101,8 @@ You can then use [other features of sqlite-utils](https://sqlite-utils.readthedo
 ```bash
 sqlite-utils enable-fts /tmp/issues.db issues title body
 ```
+## Using jq to transform each page
+
 If you install the optional [jq](https://pypi.org/project/jq/) or [pyjq](https://pypi.org/project/pyjq/) dependency you can also pass `--jq PROGRAM` to transform the results of each page using a [jq program](https://stedolan.github.io/jq/). The `jq` option you supply should transform each page of fetched results into an array of objects.
 
 For example, to extract the `id` and `title` from each issue:
