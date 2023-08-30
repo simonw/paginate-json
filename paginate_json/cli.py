@@ -14,6 +14,7 @@ except ImportError:
 @click.version_option()
 @click.argument("url", type=str, required=True)
 @click.option("--nl", help="Output newline-delimited JSON", is_flag=True)
+@click.option("--key", help="Top-level key to extract from each page")
 @click.option("--jq", help="jq transformation to run on each page")
 @click.option("--accept", help="Accept header to send")
 @click.option("--sleep", help="Seconds to delay between requests", type=int)
@@ -24,7 +25,7 @@ except ImportError:
 @click.option(
     "--header", type=(str, str), multiple=True, help="Send custom request headers"
 )
-def cli(url, nl, jq, accept, sleep, silent, show_headers, header):
+def cli(url, nl, key, jq, accept, sleep, silent, show_headers, header):
     """
     Fetch paginated JSON from a URL
     """
@@ -32,24 +33,37 @@ def cli(url, nl, jq, accept, sleep, silent, show_headers, header):
         raise click.ClickException(
             "Missing dependency: 'pip install pyjq' for this to work"
         )
+    if key and jq:
+        raise click.ClickException("Can't use --key and --jq together")
     headers = {}
     for header_name, header_value in header:
         headers[header_name] = header_value
     if nl:
-        for chunk in paginate(url, jq, accept, sleep, silent, show_headers, headers):
+        for chunk in paginate(
+            url, jq, key, accept, sleep, silent, show_headers, headers
+        ):
             if not silent:
                 click.echo(len(chunk), err=True)
             for row in chunk:
                 click.echo(json.dumps(row))
     else:
         all = []
-        for chunk in paginate(url, jq, accept, sleep, silent, show_headers, headers):
+        for chunk in paginate(
+            url, jq, key, accept, sleep, silent, show_headers, headers
+        ):
             all.extend(chunk)
         click.echo(json.dumps(all, indent=2))
 
 
 def paginate(
-    url, jq, accept=None, sleep=None, silent=False, show_headers=False, headers=None
+    url,
+    jq=None,
+    key=None,
+    accept=None,
+    sleep=None,
+    silent=False,
+    show_headers=False,
+    headers=None,
 ):
     while url:
         if not silent:
@@ -68,7 +82,9 @@ def paginate(
             url = requests.compat.urljoin(url, next)
         except AttributeError:
             url = None
-        if jq:
+        if key:
+            yield response.json()[key]
+        elif jq:
             yield pyjq.first(jq, response.json())
         else:
             yield response.json()
