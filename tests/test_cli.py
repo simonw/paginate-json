@@ -47,6 +47,21 @@ def test_paginate_json_key(requests_mock):
     assert result.stdout == "[\n  1,\n  2,\n  3,\n  4\n]\n"
 
 
+@pytest.mark.skipif(not cli.pyjq, reason="pyjq is not installed")
+def test_paginate_json_jq(requests_mock):
+    requests_mock.get(
+        "https://example.com/",
+        json={"rows": [1, 2]},
+        headers={"link": '</?page=2>; rel="next"'},
+    )
+    requests_mock.get("https://example.com/?page=2", json={"rows": [3, 4]})
+    result = CliRunner(mix_stderr=False).invoke(
+        cli.cli, ["https://example.com/", "--jq", ".rows"]
+    )
+    assert result.exit_code == 0
+    assert result.stdout == "[\n  1,\n  2,\n  3,\n  4\n]\n"
+
+
 def test_header(requests_mock):
     requests_mock.get("https://example.com/", json=[1, 2])
     result = CliRunner(mix_stderr=False).invoke(
