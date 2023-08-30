@@ -27,9 +27,24 @@ except ImportError:
     "--show-headers", help="Dump response headers out to stderr", is_flag=True
 )
 @click.option(
+    "--ignore-http-errors", help="Keep going on non-200 HTTP status codes", is_flag=True
+)
+@click.option(
     "--header", type=(str, str), multiple=True, help="Send custom request headers"
 )
-def cli(url, nl, key, jq, accept, sleep, silent, verbose, show_headers, header):
+def cli(
+    url,
+    nl,
+    key,
+    jq,
+    accept,
+    sleep,
+    silent,
+    verbose,
+    show_headers,
+    ignore_http_errors,
+    header,
+):
     """
     Fetch paginated JSON from a URL
 
@@ -51,26 +66,46 @@ def cli(url, nl, key, jq, accept, sleep, silent, verbose, show_headers, header):
         headers[header_name] = header_value
     if nl:
         for chunk in paginate(
-            url, jq, key, accept, sleep, silent, show_headers, headers
+            url=url,
+            jq=jq,
+            key=key,
+            accept=accept,
+            sleep=sleep,
+            silent=silent,
+            show_headers=show_headers,
+            ignore_http_errors=ignore_http_errors,
+            headers=headers,
         ):
             if not isinstance(chunk, list):
                 chunk = [chunk]
             for row in chunk:
                 click.echo(json.dumps(row))
     else:
-        # Output JSON array by starting with '['
-        # Then iterate two at a time to detect the last one
-        click.echo("[")
-
         def iter_all():
             for chunk in paginate(
-                url, jq, key, accept, sleep, silent, show_headers, headers
+                url=url,
+                jq=jq,
+                key=key,
+                accept=accept,
+                sleep=sleep,
+                silent=silent,
+                show_headers=show_headers,
+                ignore_http_errors=ignore_http_errors,
+                headers=headers,
             ):
                 if not isinstance(chunk, list):
                     chunk = [chunk]
                 yield from chunk
 
+        # Output JSON array by starting with '['
+        # Then iterate two at a time to detect the last one
+        first = True
         for item, last in enumerate_last(iter_all()):
+            if first:
+                # Output after first successful HTTP request, to
+                # avoid outputting '[' if the first request fails
+                click.echo("[")
+                first = False
             click.echo(
                 textwrap.indent(
                     json.dumps(item, indent=2).rstrip() + ("" if last else ","), "  "
@@ -81,6 +116,7 @@ def cli(url, nl, key, jq, accept, sleep, silent, verbose, show_headers, header):
 
 
 def paginate(
+    *,
     url,
     jq=None,
     key=None,
@@ -88,6 +124,7 @@ def paginate(
     sleep=None,
     silent=False,
     show_headers=False,
+    ignore_http_errors=False,
     headers=None,
 ):
     while url:
@@ -97,6 +134,10 @@ def paginate(
         if accept is not None:
             headers["Accept"] = accept
         response = requests.get(url, headers=headers)
+        if response.status_code != 200 and not ignore_http_errors:
+            raise click.ClickException(
+                "{} error fetching {}".format(response.status_code, url)
+            )
         if show_headers:
             click.echo(
                 json.dumps(dict(response.headers), indent=4, default=repr), err=True

@@ -145,6 +145,7 @@ Options:
   --silent                 Don't show progress on stderr - default
   -v, --verbose            Show progress on stderr
   --show-headers           Dump response headers out to stderr
+  --ignore-http-errors     Keep going on non-200 HTTP status codes
   --header <TEXT TEXT>...  Send custom request headers
   --help                   Show this message and exit.
 

@@ -73,3 +73,18 @@ def test_header(requests_mock):
     sent_request = requests_mock.request_history[0]
     assert dict(sent_request.headers)["foo"] == "bar"
     assert dict(sent_request.headers)["baz"] == "1"
+
+
+@pytest.mark.parametrize("ignore_errors", (False, True))
+def test_ignore_http_errors(requests_mock, ignore_errors):
+    requests_mock.get("https://example.com/", json=[1, 2], status_code=500)
+    result = CliRunner(mix_stderr=False).invoke(
+        cli.cli,
+        ["https://example.com/"] + (["--ignore-http-errors"] if ignore_errors else []),
+    )
+    assert result.exit_code == 0 if ignore_errors else 1
+    if ignore_errors:
+        assert result.stdout == "[\n  1,\n  2\n]\n"
+    else:
+        assert result.stdout == ""
+        assert "500 error fetching" in result.stderr
