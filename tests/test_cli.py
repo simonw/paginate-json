@@ -3,6 +3,7 @@ from click.testing import CliRunner
 import pytest
 
 
+@pytest.mark.skipif(cli.pyjq, reason="pyjq is installed")
 def test_pyjq_error():
     result = CliRunner().invoke(cli.cli, ["--jq=.", "http://example.com/"])
     assert result.exit_code != 0

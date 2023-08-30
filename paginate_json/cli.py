@@ -4,11 +4,13 @@ import json
 import textwrap
 import time
 
-
 try:
-    import pyjq
+    import jq as pyjq
 except ImportError:
-    pyjq = None
+    try:
+        import pyjq
+    except ImportError:
+        pyjq = None
 
 
 @click.command()
