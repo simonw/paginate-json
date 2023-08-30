@@ -32,6 +32,11 @@ except ImportError:
 def cli(url, nl, key, jq, accept, sleep, silent, verbose, show_headers, header):
     """
     Fetch paginated JSON from a URL
+
+    Example usage:
+
+    \b
+        paginate-json https://api.github.com/repos/simonw/datasette/issues
     """
     # --silent is only in here for backwards compatibility
     silent = not verbose
