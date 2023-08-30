@@ -112,6 +112,10 @@ paginate-json \
   --nl \
   --jq 'map({id, title})'
 ```
+If you installed `paginate-json` using `pipx` you can inject the extra dependency into the correct virtual environment like this:
+```bash
+pipx inject paginate-json jq
+```
 
 ## paginate-json --help
 
