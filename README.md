@@ -131,6 +131,10 @@ Usage: paginate-json [OPTIONS] URL
 
   Fetch paginated JSON from a URL
 
+  Example usage:
+
+      paginate-json https://api.github.com/repos/simonw/datasette/issues
+
 Options:
   --version                Show the version and exit.
   --nl                     Output newline-delimited JSON
