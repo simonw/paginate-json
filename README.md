@@ -7,31 +7,90 @@
 
 CLI tool for retrieving JSON from paginated APIs.
 
-Examples:
+This tool works against APIs that use the HTTP Link header for pagination. The GitHub API is [one example of this](https://developer.github.com/v3/guides/traversing-with-pagination/).
+
+Recipes using this tool:
 
 - [Combined release notes from GitHub with jq and paginate-json](https://til.simonwillison.net/jq/combined-github-release-notes)
 - [Export a Mastodon timeline to SQLite](https://til.simonwillison.net/mastodon/export-timeline-to-sqlite)
 
-Currently works against APIs that use the HTTP Link header for pagination. The GitHub API is [the most obvious example](https://developer.github.com/v3/guides/traversing-with-pagination/).
+## Installation
 
-    Usage: paginate-json [OPTIONS] URL
+```bash
+pip install paginate-json
+```
+Or use [pipx](https://pypa.github.io/pipx/):
+```bash
+pipx install paginate-json
+```
 
-      Fetch paginated JSON from a URL
+## Usage
 
-    Options:
-      --version                Show the version and exit.
-      --nl                     Output newline-delimited JSON
-      --jq TEXT                jq transformation to run on each page
-      --accept TEXT            Accept header to send
-      --sleep INTEGER          Seconds to delay between requests
-      --silent                 Don't show progress on stderr
-      --show-headers           Dump response headers out to stderr
-      --header <TEXT TEXT>...  Send custom request headers
-      --help                   Show this message and exit.
+Run this tool against a URL that returns a JSON list of items and uses the `link:` HTTP header to indicate the URL of the next page of results.
 
-The `--jq` option only works if you install the optional pyjq dependency.
+It will output a single JSON list containing all of the records, across multiple pages.
+```bash
+paginate-json \
+  https://api.github.com/users/simonw/events
+```
+You can use the `--header` option to send additional request headers. For example, if you have a GitHub OAuth token you can pass it like this:
+```bash
+paginate-json \
+  https://api.github.com/users/simonw/events \
+  --header Authorization "bearer e94d9e404d86..."
+```
+Some APIs may return a root level object where the items you wish to gather are stored in a key, like this example from the [Datasette JSON API](https://docs.datasette.io/en/latest/json_api.html):
+```json
+{
+  "ok": true,
+  "rows": [
+    {
+      "id": 1,
+      "name": "San Francisco"
+    },
+    {
+      "id": 2,
+      "name": "Los Angeles"
+    },
+    {
+      "id": 3,
+      "name": "Detroit"
+    },
+    {
+      "id": 4,
+      "name": "Memnonia"
+    }
+  ]
+}
+```
+In this case, use `--key rows` to specify which key to extract the items from:
+```bash
+paginate-json \
+  https://latest.datasette.io/fixtures/facet_cities.json \
+  --key rows
+```
+The output JSON will be streamed as a pretty-printed JSON array by default.
 
-Works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-utils). For example, here's how to load all of the GitHub issues for a project into a local SQLite database.
+To switch to newline-delimited JSON, with a separate object on each line, add `--nl`:
+```bash
+paginate-json \
+  https://latest.datasette.io/fixtures/facet_cities.json \
+  --key rows \
+  --nl
+```
+The output from that command looks like this:
+```
+{"id": 1, "name": "San Francisco"}
+{"id": 2, "name": "Los Angeles"}
+{"id": 3, "name": "Detroit"}
+{"id": 4, "name": "Memnonia"}
+```
+
+
+
+## Using this with sqlite-utils
+
+This tool works well in conjunction with [sqlite-utils](https://github.com/simonw/sqlite-utils). For example, here's how to load all of the GitHub issues for a project into a local SQLite database.
 ```bash
 paginate-json \
   "https://api.github.com/repos/simonw/datasette/issues?state=all&filter=all" \
@@ -42,8 +101,46 @@ You can then use [other features of sqlite-utils](https://sqlite-utils.readthedo
 ```bash
 sqlite-utils enable-fts /tmp/issues.db issues title body
 ```
-You can use the `--header` option to send additional request headers. For example, if you have a GitHub OAuth token you can pass it like this:
+If you install the optional [jq](https://pypi.org/project/jq/) or [pyjq](https://pypi.org/project/pyjq/) dependency you can also pass `--jq PROGRAM` to transform the results of each page using a [jq program](https://stedolan.github.io/jq/). The `jq` option you supply should transform each page of fetched results into an array of objects.
+
+For example, to extract the `id` and `title` from each issue:
 ```bash
-paginate-json https://api.github.com/users/simonw/events \
-  --header Authorization "bearer e94d9e404d86..."
+paginate-json \
+  "https://api.github.com/repos/simonw/datasette/issues" \
+  --nl \
+  --jq 'map({id, title})'
 ```
+
+## paginate-json --help
+
+<!-- [[[cog
+import cog
+from paginate_json import cli
+from click.testing import CliRunner
+runner = CliRunner()
+result = runner.invoke(cli.cli, ["--help"])
+help = result.output.replace("Usage: cli", "Usage: paginate-json")
+cog.out(
+    "```\n{}\n```".format(help)
+)
+]]] -->
+```
+Usage: paginate-json [OPTIONS] URL
+
+  Fetch paginated JSON from a URL
+
+Options:
+  --version                Show the version and exit.
+  --nl                     Output newline-delimited JSON
+  --key TEXT               Top-level key to extract from each page
+  --jq TEXT                jq transformation to run on each page
+  --accept TEXT            Accept header to send
+  --sleep INTEGER          Seconds to delay between requests
+  --silent                 Don't show progress on stderr
+  --show-headers           Dump response headers out to stderr
+  --header <TEXT TEXT>...  Send custom request headers
+  --help                   Show this message and exit.
+
+```
+<!-- [[[end]]] -->
+
