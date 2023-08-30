@@ -23,13 +23,18 @@ setup(
     license="Apache License, Version 2.0",
     packages=find_packages(),
     install_requires=["requests", "click"],
-    extras_require={"test": ["pytest", "requests-mock"], "pyjq": ["pyjq"]},
-    tests_require=["paginate-json[test]"],
+    extras_require={"test": ["pytest", "requests-mock", "cogapp"], "pyjq": ["pyjq"]},
     entry_points="""
         [console_scripts]
         paginate-json=paginate_json.cli:cli
     """,
     url="https://github.com/simonw/paginate-json",
+    project_urls={
+        "Changelog": "https://github.com/simonw/paginate-json/releases",
+        "Source code": "https://github.com/simonw/paginate-json",
+        "Issues": "https://github.com/simonw/paginate-json/issues",
+        "CI": "https://github.com/simonw/paginate-json/actions",
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
