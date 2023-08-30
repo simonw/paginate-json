@@ -1,6 +1,7 @@
 import click
 import requests
 import json
+import textwrap
 import time
 
 
@@ -18,17 +19,20 @@ except ImportError:
 @click.option("--jq", help="jq transformation to run on each page")
 @click.option("--accept", help="Accept header to send")
 @click.option("--sleep", help="Seconds to delay between requests", type=int)
-@click.option("--silent", help="Don't show progress on stderr", is_flag=True)
+@click.option("--silent", help="Don't show progress on stderr - default", is_flag=True)
+@click.option("-v", "--verbose", help="Show progress on stderr", is_flag=True)
 @click.option(
     "--show-headers", help="Dump response headers out to stderr", is_flag=True
 )
 @click.option(
     "--header", type=(str, str), multiple=True, help="Send custom request headers"
 )
-def cli(url, nl, key, jq, accept, sleep, silent, show_headers, header):
+def cli(url, nl, key, jq, accept, sleep, silent, verbose, show_headers, header):
     """
     Fetch paginated JSON from a URL
     """
+    # --silent is only in here for backwards compatibility
+    silent = not verbose
     if jq and not pyjq:
         raise click.ClickException(
             "Missing dependency: 'pip install pyjq' for this to work"
@@ -42,17 +46,31 @@ def cli(url, nl, key, jq, accept, sleep, silent, show_headers, header):
         for chunk in paginate(
             url, jq, key, accept, sleep, silent, show_headers, headers
         ):
-            if not silent:
-                click.echo(len(chunk), err=True)
+            if not isinstance(chunk, list):
+                chunk = [chunk]
             for row in chunk:
                 click.echo(json.dumps(row))
     else:
-        all = []
-        for chunk in paginate(
-            url, jq, key, accept, sleep, silent, show_headers, headers
-        ):
-            all.extend(chunk)
-        click.echo(json.dumps(all, indent=2))
+        # Output JSON array by starting with '['
+        # Then iterate two at a time to detect the last one
+        click.echo("[")
+
+        def iter_all():
+            for chunk in paginate(
+                url, jq, key, accept, sleep, silent, show_headers, headers
+            ):
+                if not isinstance(chunk, list):
+                    chunk = [chunk]
+                yield from chunk
+
+        for item, last in enumerate_last(iter_all()):
+            click.echo(
+                textwrap.indent(
+                    json.dumps(item, indent=2).rstrip() + ("" if last else ","), "  "
+                )
+            )
+        # Output closing ']'
+        click.echo("]")
 
 
 def paginate(
@@ -90,3 +108,19 @@ def paginate(
             yield response.json()
         if sleep is not None:
             time.sleep(sleep)
+
+
+def enumerate_last(iterable):
+    it = iter(iterable)
+    try:
+        last = next(it)
+    except StopIteration:
+        return
+    while True:
+        try:
+            current = next(it)
+            yield last, False
+            last = current
+        except StopIteration:
+            yield last, True
+            break
