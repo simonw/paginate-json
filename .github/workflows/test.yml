@@ -31,3 +31,7 @@ jobs:
     - name: Run tests
       run: |
         pytest
+    - name: Does cog need to run?
+      if: matrix.python-version == '3.11'
+      run: |
+        cog --check README.md

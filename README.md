@@ -138,7 +138,8 @@ Options:
   --jq TEXT                jq transformation to run on each page
   --accept TEXT            Accept header to send
   --sleep INTEGER          Seconds to delay between requests
-  --silent                 Don't show progress on stderr
+  --silent                 Don't show progress on stderr - default
+  -v, --verbose            Show progress on stderr
   --show-headers           Dump response headers out to stderr
   --header <TEXT TEXT>...  Send custom request headers
   --help                   Show this message and exit.
