@@ -17,6 +17,7 @@ except ImportError:
 @click.version_option()
 @click.argument("url", type=str, required=True)
 @click.option("--nl", help="Output newline-delimited JSON", is_flag=True)
+@click.option("--next", help="jq path to a link to the next page")
 @click.option("--key", help="Top-level key to extract from each page")
 @click.option("--jq", help="jq transformation to run on each page")
 @click.option("--accept", help="Accept header to send")
@@ -35,6 +36,7 @@ except ImportError:
 def cli(
     url,
     nl,
+    next,
     key,
     jq,
     accept,
@@ -67,6 +69,7 @@ def cli(
     if nl:
         for chunk in paginate(
             url=url,
+            next=next,
             jq=jq,
             key=key,
             accept=accept,
@@ -84,6 +87,7 @@ def cli(
         def iter_all():
             for chunk in paginate(
                 url=url,
+                next=next,
                 jq=jq,
                 key=key,
                 accept=accept,
@@ -118,6 +122,7 @@ def cli(
 def paginate(
     *,
     url,
+    next_jq=None,
     jq=None,
     key=None,
     accept=None,
@@ -143,7 +148,10 @@ def paginate(
                 json.dumps(dict(response.headers), indent=4, default=repr), err=True
             )
         try:
-            next = response.links.get("next").get("url")
+            if next_jq:
+                next = pyjq.first(next_jq, response.json())
+            else:
+                next = response.links.get("next").get("url")
             # Resolve a potentially-relative URL to an absolute URL
             url = requests.compat.urljoin(url, next)
         except AttributeError:
