@@ -69,7 +69,7 @@ def cli(
     if nl:
         for chunk in paginate(
             url=url,
-            next=next,
+            next_jq=next,
             jq=jq,
             key=key,
             accept=accept,
@@ -87,7 +87,7 @@ def cli(
         def iter_all():
             for chunk in paginate(
                 url=url,
-                next=next,
+                next_jq=next,
                 jq=jq,
                 key=key,
                 accept=accept,
@@ -150,6 +150,7 @@ def paginate(
         try:
             if next_jq:
                 next = pyjq.first(next_jq, response.json())
+                if not next: raise AttributeError
             else:
                 next = response.links.get("next").get("url")
             # Resolve a potentially-relative URL to an absolute URL

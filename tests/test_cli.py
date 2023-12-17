@@ -53,9 +53,11 @@ def test_next_page_jq(requests_mock):
     )
     requests_mock.get(
         "https://example.com/?page=2",
-        json=[{"id": 3}, {"id": 4}]
+        json={"rows": [{"id": 3}, {"id": 4}]}
     )
-    result = CliRunner(mix_stderr=False).invoke(cli.cli, ["https://example.com/", "--next", ".nextpage"])
+    result = CliRunner(mix_stderr=False).invoke(
+        cli.cli, ["https://example.com/", "--next", ".nextpage", "--key", "rows"]
+    )
     assert result.exit_code == 0
     assert result.stdout == (
         '[\n  {\n    "id": 1\n  },\n  {\n    "id": 2\n  },\n'
