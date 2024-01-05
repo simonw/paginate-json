@@ -142,6 +142,7 @@ Usage: paginate-json [OPTIONS] URL
 Options:
   --version                Show the version and exit.
   --nl                     Output newline-delimited JSON
+  --next TEXT              jq path to a link to the next page
   --key TEXT               Top-level key to extract from each page
   --jq TEXT                jq transformation to run on each page
   --accept TEXT            Accept header to send
