@@ -57,7 +57,7 @@ def cli(
     """
     # --silent is only in here for backwards compatibility
     silent = not verbose
-    if jq and not pyjq:
+    if (jq or next) and not pyjq:
         raise click.ClickException(
             "Missing dependency: 'pip install pyjq' for this to work"
         )

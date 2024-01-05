@@ -46,6 +46,7 @@ def test_paginate_json_key(requests_mock):
     assert result.exit_code == 0
     assert result.stdout == "[\n  1,\n  2,\n  3,\n  4\n]\n"
 
+@pytest.mark.skipif(not cli.pyjq, reason="pyjq is not installed")
 def test_next_page_jq(requests_mock):
     requests_mock.get(
         "https://example.com",
